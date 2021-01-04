@@ -204,6 +204,50 @@ resource "azurerm_virtual_network_peering" "eun_spokeHub" {
 }
 
 
+# azure firewall
+resource "azurerm_public_ip" "uks_hub" {
+    name                         = "uks_hub"
+    location                     = azurerm_resource_group.uks_hub.location
+    resource_group_name          = azurerm_resource_group.uks_hub.name
+    allocation_method            = "Dynamic"
+    domain_name_label            = "uks-hub-nbstest"
+    sku                          = "Basic"
+}
+
+resource "azurerm_firewall" "uks_hub" {
+    name                         = "uks_hub"
+    location                     = azurerm_resource_group.uks_hub.location
+    resource_group_name          = azurerm_resource_group.uks_hub.name
+
+    ip_configuration {
+        name                     = "uks_hub"
+        subnet_id                = azurerm_virtual_network.uks_hub.subnet.*.id[2]
+        public_ip_address_id     = azurerm_public_ip.uks_hub.id
+    }
+}
+
+resource "azurerm_public_ip" "eun_hub" {
+    name                         = "eun_hub"
+    location                     = azurerm_resource_group.eun_hub.location
+    resource_group_name          = azurerm_resource_group.eun_hub.name
+    allocation_method            = "Dynamic"
+    domain_name_label            = "eun-hub-nbstest"
+    sku                          = "Basic"
+}
+
+resource "azurerm_firewall" "eun_hub" {
+    name                         = "eun_hub"
+    location                     = azurerm_resource_group.eun_hub.location
+    resource_group_name          = azurerm_resource_group.eun_hub.name
+
+    ip_configuration {
+        name                     = "eun_hub"
+        subnet_id                = azurerm_virtual_network.eun_hub.subnet.*.id[2]
+        public_ip_address_id     = azurerm_public_ip.eun_hub.id
+    }
+}
+
+
 # ubuntu vms
 module "ub_uks_hub" {
     source                       = "./ubuntu"

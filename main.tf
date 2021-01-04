@@ -68,7 +68,12 @@ resource "azurerm_virtual_network" "uks_hub" {
 
     subnet {
         name                     = "AzureFirewallSubnet"
-        address_prefix           = "10.0.0.0/24"
+        address_prefix           = "10.0.0.0/25"
+    }
+
+    subnet {
+        name                     = "subnetFw"
+        address_prefix           = "10.0.0.128/25"
     }
 
     subnet {
@@ -99,7 +104,12 @@ resource "azurerm_virtual_network" "eun_hub" {
 
     subnet {
         name                     = "AzureFirewallSubnet"
-        address_prefix           = "10.0.4.0/24"
+        address_prefix           = "10.0.4.0/25"
+    }
+
+    subnet {
+        name                     = "subnetFw"
+        address_prefix           = "10.0.4.128/25"
     }
 
     subnet {
@@ -200,7 +210,7 @@ module "ub_uks_hub" {
     env                          = "uks_hub"
     rg_location                  = azurerm_resource_group.uks_hub.location
     rg_name                      = azurerm_resource_group.uks_hub.name
-    subnet                       = azurerm_virtual_network.uks_hub.subnet.*.id[1]
+    subnet                       = azurerm_virtual_network.uks_hub.subnet.*.id[2]
 }
 
 module "ub_uks_spoke" {
@@ -216,7 +226,7 @@ module "ub_eun_hub" {
     env                          = "eun_hub"
     rg_location                  = azurerm_resource_group.eun_hub.location
     rg_name                      = azurerm_resource_group.eun_hub.name
-    subnet                       = azurerm_virtual_network.eun_hub.subnet.*.id[1]
+    subnet                       = azurerm_virtual_network.eun_hub.subnet.*.id[2]
 }
 
 module "ub_eun_spoke" {

@@ -165,7 +165,7 @@ resource "azurerm_virtual_network_peering" "uks_spokeHub" {
     virtual_network_name         = azurerm_virtual_network.uks_spoke.name
     remote_virtual_network_id    = azurerm_virtual_network.uks_hub.id
     allow_forwarded_traffic      = true
-    allow_gateway_transit        = true
+    allow_gateway_transit        = false
     allow_virtual_network_access = true
     use_remote_gateways          = false
 }
@@ -188,7 +188,7 @@ resource "azurerm_virtual_network_peering" "eun_spokeHub" {
     virtual_network_name         = azurerm_virtual_network.eun_spoke.name
     remote_virtual_network_id    = azurerm_virtual_network.eun_hub.id
     allow_forwarded_traffic      = true
-    allow_gateway_transit        = true
+    allow_gateway_transit        = false
     allow_virtual_network_access = true
     use_remote_gateways          = false
 }

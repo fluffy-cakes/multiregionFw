@@ -206,7 +206,7 @@ resource "azurerm_virtual_network_peering" "eun_spokeHub" {
 
 # azure firewall
 resource "azurerm_public_ip" "uks_hub" {
-    name                         = "uks_hub"
+    name                         = "uks_hub_fw"
     location                     = azurerm_resource_group.uks_hub.location
     resource_group_name          = azurerm_resource_group.uks_hub.name
     allocation_method            = "Dynamic"
@@ -227,7 +227,7 @@ resource "azurerm_firewall" "uks_hub" {
 }
 
 resource "azurerm_public_ip" "eun_hub" {
-    name                         = "eun_hub"
+    name                         = "eun_hub_fw"
     location                     = azurerm_resource_group.eun_hub.location
     resource_group_name          = azurerm_resource_group.eun_hub.name
     allocation_method            = "Dynamic"

@@ -22,7 +22,7 @@ resource "azurerm_network_interface" "ubuntu" {
     location                          = var.rg_location
     size                              = "Standard_B2ms"
     admin_username                    = "adminuser"
-    admin_password                    = "$loppy5econds"
+    admin_password                    = "$loppy0ats!"
     disable_password_authentication   = false
     network_interface_ids             = [
         azurerm_network_interface.ubuntu.id

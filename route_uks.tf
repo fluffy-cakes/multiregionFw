@@ -42,7 +42,7 @@ resource "azurerm_route_table" "uks_hub_main" {
 }
 
 resource "azurerm_subnet_route_table_association" "uks_hub_main" {
-    subnet_id                     = azurerm_virtual_network.uks_hub.subnet.*.id[2]
+    subnet_id                     = azurerm_subnet.uks_hub_subnetHub.id
     route_table_id                = azurerm_route_table.uks_hub_main.id
 }
 
@@ -74,15 +74,15 @@ resource "azurerm_route_table" "uks_hub_azfw" {
 }
 
 resource "azurerm_subnet_route_table_association" "uks_hub_azfw" {
-    subnet_id                     = azurerm_virtual_network.uks_hub.subnet.*.id[0]
+    subnet_id                     = azurerm_subnet.uks_hub_AzureFirewallSubnet.id
     route_table_id                = azurerm_route_table.uks_hub_azfw.id
 }
 
 # spoke
 resource "azurerm_route_table" "uks_spoke" {
     name                          = "uks_spoke"
-    location                      = azurerm_resource_group.uks_hub.location
-    resource_group_name           = azurerm_resource_group.uks_hub.name
+    location                      = azurerm_resource_group.uks_spoke.location
+    resource_group_name           = azurerm_resource_group.uks_spoke.name
     disable_bgp_route_propagation = false
 
     route {
@@ -108,6 +108,6 @@ resource "azurerm_route_table" "uks_spoke" {
 }
 
 resource "azurerm_subnet_route_table_association" "uks_spoke" {
-    subnet_id                     = azurerm_virtual_network.uks_hub.subnet.*.id[0]
+    subnet_id                     = azurerm_subnet.uks_spoke_subnetSpoke.id
     route_table_id                = azurerm_route_table.uks_spoke.id
 }

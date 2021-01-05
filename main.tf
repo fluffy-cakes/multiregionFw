@@ -59,80 +59,6 @@ resource "azurerm_network_security_group" "eun_spoke" {
 }
 
 
-# virtual networks
-resource "azurerm_virtual_network" "uks_hub" {
-    name                         = "uks_hub"
-    location                     = azurerm_resource_group.uks_hub.location
-    resource_group_name          = azurerm_resource_group.uks_hub.name
-    address_space                = ["10.0.0.0/23"]
-
-    subnet {
-        name                     = "AzureFirewallSubnet"
-        address_prefix           = "10.0.0.0/25"
-    }
-
-    subnet {
-        name                     = "subnetFw"
-        address_prefix           = "10.0.0.128/25"
-    }
-
-    subnet {
-        name                     = "subnetHub"
-        address_prefix           = "10.0.1.0/24"
-        security_group           = azurerm_network_security_group.uks_hub.id
-    }
-}
-
-resource "azurerm_virtual_network" "uks_spoke" {
-    name                         = "uks_spoke"
-    location                     = azurerm_resource_group.uks_spoke.location
-    resource_group_name          = azurerm_resource_group.uks_spoke.name
-    address_space                = ["10.0.2.0/24"]
-
-    subnet {
-        name                     = "subnetSpoke"
-        address_prefix           = "10.0.2.0/24"
-        security_group           = azurerm_network_security_group.uks_spoke.id
-    }
-}
-
-resource "azurerm_virtual_network" "eun_hub" {
-    name                         = "eun_hub"
-    location                     = azurerm_resource_group.eun_hub.location
-    resource_group_name          = azurerm_resource_group.eun_hub.name
-    address_space                = ["10.0.4.0/23"]
-
-    subnet {
-        name                     = "AzureFirewallSubnet"
-        address_prefix           = "10.0.4.0/25"
-    }
-
-    subnet {
-        name                     = "subnetFw"
-        address_prefix           = "10.0.4.128/25"
-    }
-
-    subnet {
-        name                     = "subnetHub"
-        address_prefix           = "10.0.5.0/24"
-        security_group           = azurerm_network_security_group.eun_hub.id
-    }
-}
-
-resource "azurerm_virtual_network" "eun_spoke" {
-    name                         = "eun_spoke"
-    location                     = azurerm_resource_group.eun_spoke.location
-    resource_group_name          = azurerm_resource_group.eun_spoke.name
-    address_space                = ["10.0.6.0/24"]
-
-    subnet {
-        name                     = "subnetSpoke"
-        address_prefix           = "10.0.6.0/24"
-        security_group           = azurerm_network_security_group.eun_spoke.id
-    }
-}
-
-
 # virtual network peerings
 # hubs
 resource "azurerm_virtual_network_peering" "uks_hub" {
@@ -209,9 +135,9 @@ resource "azurerm_public_ip" "uks_hub" {
     name                         = "uks_hub_fw"
     location                     = azurerm_resource_group.uks_hub.location
     resource_group_name          = azurerm_resource_group.uks_hub.name
-    allocation_method            = "Dynamic"
+    allocation_method            = "Static"
     domain_name_label            = "uks-hub-nbstest"
-    sku                          = "Basic"
+    sku                          = "Standard"
 }
 
 resource "azurerm_firewall" "uks_hub" {
@@ -221,7 +147,7 @@ resource "azurerm_firewall" "uks_hub" {
 
     ip_configuration {
         name                     = "uks_hub"
-        subnet_id                = azurerm_virtual_network.uks_hub.subnet.*.id[2]
+        subnet_id                = azurerm_subnet.uks_hub_AzureFirewallSubnet.id
         public_ip_address_id     = azurerm_public_ip.uks_hub.id
     }
 }
@@ -235,11 +161,29 @@ resource "azurerm_firewall_network_rule_collection" "uks_hub" {
 
     rule {
         description              = "Any"
-        destination_addresses    = "*"
-        destination_ports        = ""
+        destination_addresses    = ["*"]
+        destination_ports        = ["*"]
         name                     = "Any"
-        protocols                = "*"
-        source_addresses         = "*"
+        protocols                = ["Any"]
+        source_addresses         = ["*"]
+    }
+}
+
+    resource "azurerm_firewall_nat_rule_collection" "uks_spoke" {
+    name                         = "ssh"
+    azure_firewall_name          = azurerm_firewall.uks_hub.name
+    resource_group_name          = azurerm_firewall.uks_hub.resource_group_name
+    priority                     = 100
+    action                       = "Dnat"
+
+    rule {
+        destination_addresses    = [azurerm_public_ip.uks_hub.ip_address]
+        destination_ports        = ["22"]
+        name                     = "ssh"
+        protocols                = ["TCP","UDP",]
+        source_addresses         = ["*"]
+        translated_address       = module.ub_uks_spoke.private_ip_address
+        translated_port          = 22
     }
 }
 
@@ -247,9 +191,9 @@ resource "azurerm_public_ip" "eun_hub" {
     name                         = "eun_hub_fw"
     location                     = azurerm_resource_group.eun_hub.location
     resource_group_name          = azurerm_resource_group.eun_hub.name
-    allocation_method            = "Dynamic"
+    allocation_method            = "Static"
     domain_name_label            = "eun-hub-nbstest"
-    sku                          = "Basic"
+    sku                          = "Standard"
 }
 
 resource "azurerm_firewall" "eun_hub" {
@@ -259,7 +203,7 @@ resource "azurerm_firewall" "eun_hub" {
 
     ip_configuration {
         name                     = "eun_hub"
-        subnet_id                = azurerm_virtual_network.eun_hub.subnet.*.id[2]
+        subnet_id                = azurerm_subnet.eun_hub_AzureFirewallSubnet.id
         public_ip_address_id     = azurerm_public_ip.eun_hub.id
     }
 }
@@ -273,11 +217,29 @@ resource "azurerm_firewall_network_rule_collection" "eun_hub" {
 
     rule {
         description              = "Any"
-        destination_addresses    = "*"
-        destination_ports        = ""
+        destination_addresses    = ["*"]
+        destination_ports        = ["*"]
         name                     = "Any"
-        protocols                = "*"
-        source_addresses         = "*"
+        protocols                = ["Any"]
+        source_addresses         = ["*"]
+    }
+}
+
+    resource "azurerm_firewall_nat_rule_collection" "eun_spoke" {
+    name                         = "ssh"
+    azure_firewall_name          = azurerm_firewall.eun_hub.name
+    resource_group_name          = azurerm_firewall.eun_hub.resource_group_name
+    priority                     = 100
+    action                       = "Dnat"
+
+    rule {
+        destination_addresses    = [azurerm_public_ip.eun_hub.ip_address]
+        destination_ports        = ["22"]
+        name                     = "ssh"
+        protocols                = ["TCP","UDP",]
+        source_addresses         = ["*"]
+        translated_address       = module.ub_eun_spoke.private_ip_address
+        translated_port          = 22
     }
 }
 
@@ -288,7 +250,7 @@ module "ub_uks_hub" {
     env                          = "uks_hub"
     rg_location                  = azurerm_resource_group.uks_hub.location
     rg_name                      = azurerm_resource_group.uks_hub.name
-    subnet                       = azurerm_virtual_network.uks_hub.subnet.*.id[2]
+    subnet                       = azurerm_subnet.uks_hub_subnetHub.id
 }
 
 module "ub_uks_spoke" {
@@ -296,7 +258,7 @@ module "ub_uks_spoke" {
     env                          = "uks_spoke"
     rg_location                  = azurerm_resource_group.uks_spoke.location
     rg_name                      = azurerm_resource_group.uks_spoke.name
-    subnet                       = azurerm_virtual_network.uks_spoke.subnet.*.id[0]
+    subnet                       = azurerm_subnet.uks_spoke_subnetSpoke.id
 }
 
 module "ub_eun_hub" {
@@ -304,7 +266,7 @@ module "ub_eun_hub" {
     env                          = "eun_hub"
     rg_location                  = azurerm_resource_group.eun_hub.location
     rg_name                      = azurerm_resource_group.eun_hub.name
-    subnet                       = azurerm_virtual_network.eun_hub.subnet.*.id[2]
+    subnet                       = azurerm_subnet.eun_hub_subnetHub.id
 }
 
 module "ub_eun_spoke" {
@@ -312,5 +274,12 @@ module "ub_eun_spoke" {
     env                          = "eun_spoke"
     rg_location                  = azurerm_resource_group.eun_spoke.location
     rg_name                      = azurerm_resource_group.eun_spoke.name
-    subnet                       = azurerm_virtual_network.eun_spoke.subnet.*.id[0]
+    subnet                       = azurerm_subnet.eun_spoke_subnetSpoke.id
 }
+
+output azfw_eun_hub { value      = azurerm_public_ip.eun_hub.ip_address   }
+output azfw_uks_hub { value      = azurerm_public_ip.uks_hub.ip_address   }
+output ub_eun_hub   { value      = module.ub_eun_hub.private_ip_address   }
+output ub_eun_spoke { value      = module.ub_eun_spoke.private_ip_address }
+output ub_uks_hub   { value      = module.ub_uks_hub.private_ip_address   }
+output ub_uks_spoke { value      = module.ub_uks_spoke.private_ip_address }

@@ -40,3 +40,7 @@ resource "azurerm_network_interface" "ubuntu" {
         version                       = "latest"
     }
 }
+
+output private_ip_address {
+    value                             = azurerm_network_interface.ubuntu.private_ip_address
+}

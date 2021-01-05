@@ -42,7 +42,7 @@ resource "azurerm_route_table" "eun_hub_main" {
 }
 
 resource "azurerm_subnet_route_table_association" "eun_hub_main" {
-    subnet_id                     = azurerm_virtual_network.eun_hub.subnet.*.id[2]
+    subnet_id                     = azurerm_subnet.eun_hub_subnetHub.id
     route_table_id                = azurerm_route_table.eun_hub_main.id
 }
 
@@ -74,15 +74,15 @@ resource "azurerm_route_table" "eun_hub_azfw" {
 }
 
 resource "azurerm_subnet_route_table_association" "eun_hub_azfw" {
-    subnet_id                     = azurerm_virtual_network.eun_hub.subnet.*.id[0]
+    subnet_id                     = azurerm_subnet.eun_hub_AzureFirewallSubnet.id
     route_table_id                = azurerm_route_table.eun_hub_azfw.id
 }
 
 # spoke
 resource "azurerm_route_table" "eun_spoke" {
     name                          = "eun_spoke"
-    location                      = azurerm_resource_group.eun_hub.location
-    resource_group_name           = azurerm_resource_group.eun_hub.name
+    location                      = azurerm_resource_group.eun_spoke.location
+    resource_group_name           = azurerm_resource_group.eun_spoke.name
     disable_bgp_route_propagation = false
 
     route {
@@ -108,6 +108,6 @@ resource "azurerm_route_table" "eun_spoke" {
 }
 
 resource "azurerm_subnet_route_table_association" "eun_spoke" {
-    subnet_id                     = azurerm_virtual_network.eun_hub.subnet.*.id[0]
+    subnet_id                     = azurerm_subnet.eun_spoke_subnetSpoke.id
     route_table_id                = azurerm_route_table.eun_spoke.id
 }

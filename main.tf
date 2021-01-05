@@ -226,6 +226,23 @@ resource "azurerm_firewall" "uks_hub" {
     }
 }
 
+resource "azurerm_firewall_network_rule_collection" "uks_hub" {
+    name                         = "any"
+    azure_firewall_name          = azurerm_firewall.uks_hub.name
+    resource_group_name          = azurerm_firewall.uks_hub.resource_group_name
+    priority                     = "100"
+    action                       = "Allow"
+
+    rule {
+        description              = "Any"
+        destination_addresses    = "*"
+        destination_ports        = ""
+        name                     = "Any"
+        protocols                = "*"
+        source_addresses         = "*"
+    }
+}
+
 resource "azurerm_public_ip" "eun_hub" {
     name                         = "eun_hub_fw"
     location                     = azurerm_resource_group.eun_hub.location
@@ -244,6 +261,23 @@ resource "azurerm_firewall" "eun_hub" {
         name                     = "eun_hub"
         subnet_id                = azurerm_virtual_network.eun_hub.subnet.*.id[2]
         public_ip_address_id     = azurerm_public_ip.eun_hub.id
+    }
+}
+
+resource "azurerm_firewall_network_rule_collection" "eun_hub" {
+    name                         = "any"
+    azure_firewall_name          = azurerm_firewall.eun_hub.name
+    resource_group_name          = azurerm_firewall.eun_hub.resource_group_name
+    priority                     = "100"
+    action                       = "Allow"
+
+    rule {
+        description              = "Any"
+        destination_addresses    = "*"
+        destination_ports        = ""
+        name                     = "Any"
+        protocols                = "*"
+        source_addresses         = "*"
     }
 }
 

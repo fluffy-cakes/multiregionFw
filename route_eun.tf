@@ -11,6 +11,34 @@ resource "azurerm_route_table" "eun_hub_main" {
         next_hop_type             = "VirtualAppliance"
         next_hop_in_ip_address    = "10.0.4.4"
     }
+
+    route {
+        name                      = "withinSubnetHub"
+        address_prefix            = "10.0.5.0/24"
+        next_hop_type             = "VirtualAppliance"
+        next_hop_in_ip_address    = "10.0.4.4"
+    }
+
+    route {
+        name                      = "eun_spoke"
+        address_prefix            = "10.0.6.0/24"
+        next_hop_type             = "VirtualAppliance"
+        next_hop_in_ip_address    = "10.0.4.4"
+    }
+
+    route {
+        name                      = "uks_hub"
+        address_prefix            = "10.0.1.0/24"
+        next_hop_type             = "VirtualAppliance"
+        next_hop_in_ip_address    = "10.0.4.4"
+    }
+
+    route {
+        name                      = "uks_spoke"
+        address_prefix            = "10.0.2.0/24"
+        next_hop_type             = "VirtualAppliance"
+        next_hop_in_ip_address    = "10.0.4.4"
+    }
 }
 
 resource "azurerm_subnet_route_table_association" "eun_hub_main" {
@@ -36,6 +64,13 @@ resource "azurerm_route_table" "eun_hub_azfw" {
         next_hop_type             = "VirtualAppliance"
         next_hop_in_ip_address    = "10.0.0.4"
     }
+
+    route {
+        name                      = "uks_subnetHub"
+        address_prefix            = "10.0.1.0/24"
+        next_hop_type             = "VirtualAppliance"
+        next_hop_in_ip_address    = "10.0.0.4"
+    }
 }
 
 resource "azurerm_subnet_route_table_association" "eun_hub_azfw" {
@@ -53,6 +88,20 @@ resource "azurerm_route_table" "eun_spoke" {
     route {
         name                      = "Default"
         address_prefix            = "0.0.0.0/0"
+        next_hop_type             = "VirtualAppliance"
+        next_hop_in_ip_address    = "10.0.4.4"
+    }
+
+    route {
+        name                      = "withinSubnetSpoke"
+        address_prefix            = "10.0.6.0/24"
+        next_hop_type             = "VirtualAppliance"
+        next_hop_in_ip_address    = "10.0.4.4"
+    }
+
+    route {
+        name                      = "eun_hub"
+        address_prefix            = "10.0.5.0/24"
         next_hop_type             = "VirtualAppliance"
         next_hop_in_ip_address    = "10.0.4.4"
     }
